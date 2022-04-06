@@ -17,7 +17,6 @@ export class TodosPage implements OnInit {
   @ViewChild(TodoButtonComponent, { static: true })
   private TodoButton: TodoButtonComponent;
 
-  // Refers todo service
   constructor(private todoService: TodosService) {}
 
   ngOnInit() {}
@@ -29,31 +28,34 @@ export class TodosPage implements OnInit {
       this.todos = [];
 
       this.todoService.getTodos().subscribe(
-        (todos) => {
+        (todos: TODO[]) => {
           this.setButtonState(BUTTON_STATE.LOADED_AND_DELAYING);
           this.todos = todos;
         },
         () => {
           this.setButtonState(BUTTON_STATE.ERROR);
+        },
+        () => {
+          this.setButtonState(BUTTON_STATE.LOADED);
         }
       );
     }
+
     // Fulfil condition for button LOADED_AND_DELAYING state
     else if (state == BUTTON_STATE.LOADED_AND_DELAYING) {
       this.setButtonState(BUTTON_STATE.LOADED_AND_DELAYING);
     }
+
     // Fulfil cndition for button LOADED state
     else if (state == BUTTON_STATE.LOADED) {
       this.setButtonState(BUTTON_STATE.LOADED);
-    }
-    // Fulfill condition for button ERROR state
-    else {
+    } else {
       this.setButtonState(BUTTON_STATE.ERROR);
-      this.todos = [];
     }
   }
 
   private setButtonState(state: BUTTON_STATE) {
-    this.TodoButton.state = state;
+    this.TodoButton.state = this.buttonState;
+    this.buttonState = state;
   }
 }

@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { config } from '../../data/config';
 import { BUTTON_STATE } from '../../types/btn-state';
+import { delay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-todo-button',
@@ -11,7 +12,6 @@ import { BUTTON_STATE } from '../../types/btn-state';
 export class TodoButtonComponent implements OnInit {
   BUTTON_STATE: typeof BUTTON_STATE = BUTTON_STATE;
 
-  //Should be emitted when the state is changed and the new state should be supplied as event data
   @Output() stateChange = new EventEmitter<BUTTON_STATE>();
 
   private delaySecs: number = config.todos.delayAfterLoadSecs;
@@ -28,19 +28,21 @@ export class TodoButtonComponent implements OnInit {
     return this._state;
   }
 
-  // button string
-  btnText: string;
-  // button disabled boolean
+  @Input() btnText: string;
+  // btnText: string;
   btnDisabled: boolean;
 
-  // initialize button state as loading
+  @Input() set buttonState(state: BUTTON_STATE) {
+    this.state = state;
+  }
+
   ngOnInit() {
     this.state = BUTTON_STATE.LOADING;
   }
 
-  // click function to state change button
   onClick() {
     this.state = BUTTON_STATE.LOADING;
+    this.state = BUTTON_STATE.LOADED_AND_DELAYING;
   }
 
   private reflectState() {
@@ -74,15 +76,13 @@ export class TodoButtonComponent implements OnInit {
 
       // the button should be enabled and should have Load Error.Retry as label. There should be no delay
       case BUTTON_STATE.ERROR:
-        this.btnText = 'Load Error.Retry';
+        this.btnText = 'Load Error. Retry';
         this.btnDisabled = false;
         break;
     }
   }
 
   private delay(): Observable<number> {
-    // Delay secs for laoding and delaying button state
-    const delaySecs = this.delaySecs;
-    return of(delaySecs).pipe();
+    return of(this.delaySecs).pipe(delay(10000));
   }
 }

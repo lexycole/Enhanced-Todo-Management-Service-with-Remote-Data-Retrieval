@@ -9,16 +9,23 @@ import { config } from '../data/config';
   providedIn: 'root',
 })
 export class TodosService {
-  // should fetched from the url todos API
   private TODOS_URL = 'https://jsonplaceholder.typicode.com/todos';
 
   constructor(private http: HttpClient) {}
 
-  // Should get todos and hydrate
   getTodos(): Observable<TODO[]> {
     return this.http.get<any[]>(this.TODOS_URL).pipe(
       switchMap((todos) => {
+        // Should fail to return todos if the last digit of epoch time in milliseconds when the todos was successfully fetched from the API is a prime number
         const timeNow = Date.now();
+        if (timeNow < 2) {
+          return of([
+            this.hydrateTodo({
+              title: null,
+              completed: false,
+            }),
+          ]);
+        }
 
         return of(todos);
       }),
@@ -27,6 +34,7 @@ export class TodosService {
       )
     );
   }
+
   // Should hydrate each todo item fetched into the app-wide todo object type
   private hydrateTodo(todo: any): TODO {
     return {
